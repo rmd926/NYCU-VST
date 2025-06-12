@@ -1,52 +1,3 @@
-# import torch
-# import cv2
-# from pathlib import Path
-# from yolox.exp import get_exp
-# from yolox.data.data_augment import ValTransform
-# from yolox.utils import postprocess
-
-# # 設置模型配置和模型加載
-# exp = get_exp('exps/example/custom/yolox_s.py', 'yolox-s')  # 替換為實際的 exp 文件和模型名稱
-# model = exp.get_model()
-# ckpt = torch.load('YOLOX_outputs/yolox_s/epoch_161_ckpt.pth', map_location='cpu')
-# model.load_state_dict(ckpt['model'])
-# model.eval()
-# model.cuda()
-
-# # 設置圖像處理
-# preproc = ValTransform(legacy=False)
-
-# # 圖像目錄
-# image_dir = Path('datasets/val2017')
-# image_paths = list(image_dir.glob('*.jpg'))
-
-# # 讀取和預處理圖像
-# imgs = []
-# for path in image_paths:
-#     img = cv2.imread(str(path))
-#     img, _ = preproc(img, None, exp.test_size)
-#     imgs.append(torch.from_numpy(img).unsqueeze(0))
-# batch = torch.cat(imgs, 0).cuda()
-
-# # 推論
-# with torch.no_grad():
-#     outputs = model(batch)
-#     # 設定置信度閾值為0.7，NMS閾值為0.65
-#     outputs = postprocess(outputs, exp.num_classes, 0.7, 0.65)
-
-# # 顯示結果
-# for i, output in enumerate(outputs):
-#     if output is not None:
-#         output = output.cpu()
-#         bboxes = output[:, 0:4]
-#         scores = output[:, 4] * output[:, 5]
-#         for j in range(bboxes.size(0)):
-#             bbox = bboxes[j]
-#             score = scores[j]
-#             print(f"Image: {image_paths[i].name}, Confidence: {score:.2f}, "
-#                   f"BBox: [{bbox[0]:.2f}, {bbox[1]:.2f}, {bbox[2]:.2f}, {bbox[3]:.2f}]")
-#epoch_296_ckpt
-
 import os
 import torch
 import cv2
@@ -61,7 +12,7 @@ current_dir = Path(__file__).resolve()  # 獲取當前腳本的絕對路徑
 parent_dir = current_dir.parents[2]     # 移動到上兩層目錄
 
 # 在上兩層目錄中創建 'Result' 資料夾
-result_dir = parent_dir / 'Result'
+result_dir = parent_dir / 'Result1'
 result_dir.mkdir(parents=True, exist_ok=True)
 
 exp = get_exp('exps/example/custom/yolox_s.py', 'yolox-s') 
@@ -73,7 +24,7 @@ model.eval()
 model.cuda()
 preproc = ValTransform(legacy=False)
 
-image_dir = Path('datasets/test_1')
+image_dir = Path('datasets/val2017')
 image_paths = list(image_dir.glob('*.jpg'))
 
 # 讀取和預處理圖像
@@ -110,12 +61,11 @@ for i, output in enumerate(outputs):
                 score = scores[j]
                 # 邊界框從模型輸入比例（1024x576）轉換為原始圖像比例
                 bbox[0] *= scale_w  # x1
-                bbox[1] *= scale_h  # y1
+                bbox[1] *= scale_h*16*16/9/9  # y1
                 bbox[2] *= scale_w  # x2
-                bbox[3] *= scale_h  # y2
+                bbox[3] *= scale_h*16*16/9/9  # y2
 
                 bbox = torch.round(bbox).int()
                 f.write(f"0 {score:.6f} {bbox[0].item()} {bbox[1].item()} {bbox[2].item()} {bbox[3].item()}\n")
                 
             print(f"Complete and save {txt_file_path}")
-
