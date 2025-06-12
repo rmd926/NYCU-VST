@@ -8,4 +8,4 @@
 
 ## Attention 
 
-to_txt.py has some bugs that may make your submission.txt has tremendous bias and error, you can refer to to_txt.py but please do some modifications to make sure your mapping of the prediction bboxes will be correct.
+to_txt.py might have some bugs that may make your submission.txt has tremendous bias and error, you can refer to to_txt.py but please do some modifications to make sure your mapping of the prediction bboxes will be correct.
